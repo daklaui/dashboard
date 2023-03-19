@@ -2,7 +2,6 @@ import Auth0Lock from 'auth0-lock';
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import AUTH_CONFIG from './auth0ServiceConfig';
-import httpClient from '@fuse/core/ApiClient';
 
 class Auth0Service {
   sdk = { auth0Manage: null };
@@ -25,7 +24,7 @@ class Auth0Service {
         redirect: false,
         redirectUrl: AUTH_CONFIG.callbackUrl,
         responseType: 'token id_token',
-        audience: `https://portal.lobium.ai`,
+        audience: `https://${AUTH_CONFIG.domain}/api/v2/`,
         params: {
           scope:
             'openid profile email user_metadata app_metadata picture update:current_user_metadata create:current_user_metadata read:current_user',
@@ -83,7 +82,6 @@ class Auth0Service {
   setSession = (authResult) => {
     if (authResult && authResult.accessToken && authResult.idToken) {
       // Set the time that the access token will expire at
-
       const expiresAt = JSON.stringify(authResult.expiresIn * 1000 + new Date().getTime());
       localStorage.setItem('access_token', authResult.accessToken);
       localStorage.setItem('id_token', authResult.idToken);
@@ -119,9 +117,10 @@ class Auth0Service {
     return new Promise((resolve, reject) => {
       const tokenData = this.getTokenData();
       const { sub: userId } = tokenData;
+
       const auth0UserUrl = `https://${AUTH_CONFIG.domain}/api/v2/users/${userId}`;
 
-      httpClient
+      axios
         .get(auth0UserUrl, {
           headers: {
             'Content-Type': 'application/json',
