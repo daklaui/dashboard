@@ -10,7 +10,12 @@ const initialState = {
 };
 
 export const getAccounts = createAsyncThunk('accounts', async (params) => {
-  const response = await httpClient.get('accounts');
+  const response = await httpClient.get('accounts', {
+    params: {
+      page: params?.page ? params?.page : 0,
+      limit: params?.perPage ? params?.perPage : 10000,
+    }
+  });
   const data = await response.data;
   return data;
 });
@@ -18,8 +23,8 @@ export const getAccounts = createAsyncThunk('accounts', async (params) => {
 export const getAccount = createAsyncThunk(
   "getAccount",
   async (id, { dispatch, getState }) => {
-    const { List } = getState().albums.albums;
-    return List.find((element) => `${element.ID}` === id + '');
+    const { List } = getState().accounts.accounts;
+    return List.find((element) => `${element.id}` === id);
   }
 );
 
@@ -30,19 +35,19 @@ export const deleteAccount = createAsyncThunk('removeAccount', async (params) =>
 });
 export const addAccount = createAsyncThunk("addAccount", async (params) => {
   const response = await httpClient.post("accounts", {
-    data: {
+    
       ...params,
-    },
+    
   });
   const data = await response.data;
   return data;
 });
 
 export const editAccount = createAsyncThunk('updateAccount', async (params) => {
-  const response = await httpClient.put(`accounts/${params?.record_id}`, {
-    data: {
-      ...params,
-    },
+  const response = await httpClient.put(`accounts/${params?.account_id}`, {
+
+    ...params,
+
   });
   const data = await response.data;
   return data;
@@ -72,8 +77,12 @@ const AccountSlice = createSlice({
     [getAccounts.fulfilled]: (state, { payload }) => {
       state.loading = false;
       state.error = false;
-      state.List = payload.response[1].DataList;
-      state.TotalCount = payload.response[0].TotalCount;
+      state.List = payload.results.sort(function(a,b){
+        // Turn your strings into dates, and then subtract them
+        // to get a value that is either negative, positive, or zero.
+        return new Date(b.updated) - new Date(a.updated);
+      });;
+      state.TotalCount = payload.limit;
     },
     [addAccount.pending]: (state) => {
       state.loading = true;
@@ -81,7 +90,7 @@ const AccountSlice = createSlice({
     [addAccount.fulfilled]: (state, { payload }) => {
       state.loading = false;
       state.error = payload.msg === "error";
-      state.message = payload.msg === "error" ? payload.response : payload.msg;
+      state.message = payload.msg === "error" ? payload.response :  'success';
     },
     [addAccount.rejected]: (state, { payload }) => {
       state.loading = false;
@@ -94,7 +103,7 @@ const AccountSlice = createSlice({
     [editAccount.fulfilled]: (state, { payload }) => {
       state.loading = false;
       state.error = payload.msg === "error";
-      state.message = payload.msg === "error" ? payload.response : payload.msg;
+      state.message = payload.msg === "error" ? payload.response : 'success';
     },
     [editAccount.rejected]: (state, { payload }) => {
       state.loading = false;

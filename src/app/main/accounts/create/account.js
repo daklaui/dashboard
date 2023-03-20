@@ -8,9 +8,10 @@ import { showMessage } from 'app/store/fuse/messageSlice';
 
 import withReducer from 'app/store/withReducer';
 import reducer from '../store';
-import { AppBar, Autocomplete, Box, Button, Card, CardContent, Chip, FormControl, Grid, Icon, InputAdornment, InputLabel, ListSubheader, MenuItem, OutlinedInput, Select, TextField, Toolbar } from '@mui/material';
+import { AppBar, Autocomplete, Box, Button, Card, CardContent, Chip, FormControl, FormHelperText, Grid, Icon, InputAdornment, InputLabel, ListSubheader, MenuItem, OutlinedInput, Select, TextField, Toolbar } from '@mui/material';
 import { yupResolver } from '@hookform/resolvers/yup';
 import Header from 'app/components/header';
+import { addAccount, clearMessage, editAccount, getAccount } from '../store/accountSlice';
 function Account() {
   const dispatch = useDispatch();
   const { accounts } = useSelector((state) => state.accounts);
@@ -35,8 +36,12 @@ function Account() {
   const { isValid, dirtyFields, errors } = formState;
 
   useDeepCompareEffect(() => {
-    function updateProductState() {
+    async function updateProductState() {
       if (accountId !== 'new') {
+        const albumsData = await dispatch(getAccount(accountId))
+        console.log(albumsData)
+        setValue("title", albumsData.payload.title)
+        setValue("type", albumsData.payload.type)
         setLoading(false)
       }
       else {
@@ -68,7 +73,18 @@ function Account() {
     }
   }, [accounts]);
 
-  async function onSubmit(values) { }
+  async function onSubmit(values) {
+
+    if (accountId === 'new') {
+      setLoading(true)
+      dispatch(addAccount(values));
+    }
+    else {
+      setLoading(true)
+      values.account_id = accountId
+      dispatch(editAccount(values));
+    }
+  }
   return (
     <div>
       <Grid container className='mb-20'>
@@ -111,34 +127,29 @@ function Account() {
                           )}
                         />
                         <FormControl sx={{ mb: 3 }}>
-                          <InputLabel id="demo-multiple-name-label">Artist*</InputLabel>
-                          <Select
-                            labelId="demo-multiple-name-label"
-                            id="demo-multiple-name"
-                            multiple
-                            value={[]}
-                            onChange={() => { }}
-                            input={<OutlinedInput label="Name" />}
-                          >
+                          <Controller
+                            name="type"
+                            control={control}
+                            render={({ field }) => (
+                              <FormControl fullWidth>
+                                <InputLabel error={!!errors.type} id="Role-select-label">Type</InputLabel>
+                                <Select
+                                  {...field}
+                                  labelId="Role-select-label"
+                                  id="Role-select"
+                                  required
+                                  error={!!errors.type}
+                                >
+                                  <MenuItem selected disabled>Select type</MenuItem>
+                                  <MenuItem value={'personal'}>Personal</MenuItem>
+                                  <MenuItem value={'organization'}>Organization</MenuItem>
 
-                            <MenuItem disabled value="">
-                              <em>Type</em>
-                            </MenuItem>
+                                </Select>
+                                <FormHelperText error={true}>{errors?.type?.message}</FormHelperText>
+                              </FormControl>
+                            )}
+                          />
 
-                            <MenuItem
-                              key={0}
-                              value={"personal"}
-                            >
-                              Personal
-                            </MenuItem>
-                            <MenuItem
-                              key={0}
-                              value={"organization"}
-                            >
-                              Organization
-                            </MenuItem>
-
-                          </Select>
                         </FormControl>
                       </Box>
 

@@ -24,7 +24,7 @@ class Auth0Service {
         redirect: false,
         redirectUrl: AUTH_CONFIG.callbackUrl,
         responseType: 'token id_token',
-        audience: `https://${AUTH_CONFIG.domain}/api/v2/`,
+        audience: `https://portal.lobium.ai`,
         params: {
           scope:
             'openid profile email user_metadata app_metadata picture update:current_user_metadata create:current_user_metadata read:current_user',
@@ -118,7 +118,7 @@ class Auth0Service {
       const tokenData = this.getTokenData();
       const { sub: userId } = tokenData;
 
-      const auth0UserUrl = `https://${AUTH_CONFIG.domain}/api/v2/users/${userId}`;
+      const auth0UserUrl = `https://lobium.eu.auth0.com/userinfo`;
 
       axios
         .get(auth0UserUrl, {

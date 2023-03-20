@@ -11,7 +11,6 @@ const requestHandler = config => {
   if (config.url !== "/login") {
     const token = `Bearer ${localStorage.getItem('access_token')}`;
     config.headers.Authorization = token;
-    config.headers.put['Content-Type'] = 'application/json; charset=UTF-8'; 
   }
   return config;
 };

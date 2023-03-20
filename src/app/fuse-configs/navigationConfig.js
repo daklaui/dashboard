@@ -16,12 +16,30 @@ const navigationConfig = [
     icon: 'apps',
     children: [
       {
-        id: 'example-component',
-        title: 'Example',
-        translate: 'EXAMPLE',
-        type: 'item',
-        icon: 'whatshot',
-        url: 'example',
+        id: 'account-component',
+        title: 'Accounts',
+        translate: 'ACCOUNTS',
+        type: "collapse",
+        icon: "person",
+        url: "auth/accounts",
+        children: [
+          {
+            id: "accounts_list",
+            title: "Accounts List",
+            translate: "ACCOUNTS_LIST",
+            type: "item",
+            url: "auth/accounts/list",
+            end: true,
+          },
+          {
+            id: "account",
+            title: "Add Account",
+            translate: "ADD_ACCOUNT",
+            type: "item",
+            url: "auth/accounts/new",
+            end: true,
+          }
+        ]
       },
     ],
   },
